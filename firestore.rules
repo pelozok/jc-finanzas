@@ -1,0 +1,88 @@
+rules_version = '2';
+
+// ================================================================
+// Reglas de seguridad de Firestore — JC Finanzas (Jóvenes Central)
+//
+// Este archivo es la COPIA MAESTRA de las reglas. Para que tengan
+// efecto hay que pegarlas en:
+//   Firebase console → Firestore Database → pestaña "Reglas" → Publicar
+//
+// Estas reglas se evalúan en los servidores de Google: aunque
+// alguien modifique la app en su navegador, no puede saltárselas.
+// ================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ============================================================
+    // LISTA DE CORREOS AUTORIZADOS
+    // Para dar o quitar acceso a una persona, editá esta lista
+    // (un correo por línea, entre comillas, separados por comas)
+    // y presioná "Publicar" en la consola.
+    // ============================================================
+    function esAutorizado() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+             'kevindp2008@gmail.com'
+           ];
+    }
+
+    // Validación de datos: tipos correctos, montos positivos,
+    // campos requeridos y ningún campo extra.
+    function esMovimientoValido(d) {
+      return d.monto is number && d.monto > 0 && d.monto <= 1000000000
+        && d.fecha is string && d.fecha.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && d.descripcion is string && d.descripcion.size() <= 500
+        && d.creadoPor is string
+        && (
+          (
+            d.tipo in ['ingreso', 'gasto']
+            && d.keys().hasAll(['tipo', 'monto', 'fecha', 'categoria', 'descripcion', 'metodo', 'creadoPor', 'creadoEn'])
+            && d.keys().hasOnly(['tipo', 'monto', 'fecha', 'categoria', 'descripcion', 'metodo', 'creadoPor', 'creadoEn'])
+            && d.categoria is string && d.categoria.size() > 0 && d.categoria.size() <= 50
+            && d.metodo in ['efectivo', 'depositado']
+          )
+          ||
+          (
+            d.tipo == 'traslado'
+            && d.keys().hasAll(['tipo', 'monto', 'fecha', 'descripcion', 'direccion', 'creadoPor', 'creadoEn'])
+            && d.keys().hasOnly(['tipo', 'monto', 'fecha', 'descripcion', 'direccion', 'creadoPor', 'creadoEn'])
+            && d.direccion in ['efectivo-a-depositado', 'depositado-a-efectivo']
+          )
+        );
+    }
+
+    match /movimientos/{id} {
+      allow read: if esAutorizado();
+
+      allow create: if esAutorizado()
+        && esMovimientoValido(request.resource.data)
+        && request.resource.data.creadoPor == request.auth.token.email
+        && request.resource.data.creadoEn == request.time;
+
+      // Al editar no se permite cambiar quién lo creó ni cuándo.
+      allow update: if esAutorizado()
+        && esMovimientoValido(request.resource.data)
+        && request.resource.data.creadoPor == resource.data.creadoPor
+        && request.resource.data.creadoEn == resource.data.creadoEn;
+
+      allow delete: if esAutorizado();
+    }
+
+    // Lista de categorías (un solo documento).
+    match /config/categorias {
+      allow read: if esAutorizado();
+      allow write: if esAutorizado()
+        && request.resource.data.keys().hasOnly(['lista'])
+        && request.resource.data.lista is list
+        && request.resource.data.lista.size() > 0
+        && request.resource.data.lista.size() <= 30;
+    }
+
+    // Cualquier otra ruta: prohibido para todo el mundo.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,494 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --verde: #0f766e;
+  --verde-oscuro: #115e59;
+  --verde-claro: #ccfbf1;
+  --positivo: #16a34a;
+  --negativo: #dc2626;
+  --azul: #2563eb;
+  --fondo: #f1f5f9;
+  --tarjeta: #ffffff;
+  --texto: #0f172a;
+  --texto-suave: #64748b;
+  --borde: #e2e8f0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+  min-height: 100vh;
+}
+
+.app {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 12px calc(24px + env(safe-area-inset-bottom));
+}
+
+/* ---------- Encabezado ---------- */
+
+.encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 4px 10px;
+}
+
+.titulo h1 {
+  font-size: 1.25rem;
+  line-height: 1.1;
+}
+
+.titulo span {
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+}
+
+.boton-salir {
+  border: 1px solid var(--borde);
+  background: var(--tarjeta);
+  color: var(--texto-suave);
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+/* ---------- Saldos (siempre visibles arriba) ---------- */
+
+.saldos {
+  position: sticky;
+  top: 8px;
+  z-index: 10;
+  background: linear-gradient(135deg, var(--verde), var(--verde-oscuro));
+  color: #fff;
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 8px 20px rgba(15, 118, 110, 0.35);
+}
+
+.saldo-total {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.saldos-detalle {
+  display: flex;
+  padding-top: 12px;
+}
+
+.saldos-detalle .saldo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.saldo-etiqueta {
+  font-size: 0.78rem;
+  opacity: 0.85;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.saldo-monto {
+  font-size: 1.15rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.saldo-monto.grande {
+  font-size: 1.9rem;
+}
+
+/* ---------- Botones de acción ---------- */
+
+.acciones {
+  display: flex;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.boton {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.boton:active {
+  opacity: 0.8;
+}
+
+.boton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.acciones .boton {
+  flex: 1;
+  padding: 12px 6px;
+}
+
+.accion-ingreso {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.accion-gasto {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.accion-traslado {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.boton.primario {
+  background: var(--verde);
+  color: #fff;
+  width: 100%;
+}
+
+.boton.secundario {
+  background: var(--tarjeta);
+  color: var(--texto);
+  border: 1px solid var(--borde);
+}
+
+/* ---------- Historial ---------- */
+
+.historial-barra {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.historial-barra h2 {
+  font-size: 1.05rem;
+  flex: 1;
+}
+
+.historial-barra select {
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  background: var(--tarjeta);
+  color: var(--texto);
+}
+
+.vacio {
+  text-align: center;
+  color: var(--texto-suave);
+  padding: 32px 0;
+  font-size: 0.9rem;
+}
+
+.lista {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.item-titulo {
+  font-weight: 600;
+  font-size: 0.95rem;
+  overflow-wrap: anywhere;
+}
+
+.item-detalle {
+  font-size: 0.78rem;
+  color: var(--texto-suave);
+}
+
+.item-derecha {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.item-monto {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.item-monto.ingreso {
+  color: var(--positivo);
+}
+
+.item-monto.gasto {
+  color: var(--negativo);
+}
+
+.item-monto.traslado {
+  color: var(--azul);
+}
+
+.item-botones {
+  display: flex;
+  gap: 2px;
+}
+
+.boton-icono {
+  border: none;
+  background: none;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 8px;
+}
+
+.boton-icono:active {
+  background: var(--fondo);
+}
+
+/* ---------- Pantallas centradas (login / acceso denegado) ---------- */
+
+.pantalla-centrada {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: var(--texto-suave);
+}
+
+.tarjeta {
+  background: var(--tarjeta);
+  border-radius: 20px;
+  padding: 32px 24px;
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  color: var(--texto);
+}
+
+.tarjeta h1 {
+  font-size: 1.4rem;
+  margin-bottom: 10px;
+}
+
+.tarjeta p {
+  font-size: 0.95rem;
+  color: var(--texto-suave);
+  margin-bottom: 14px;
+  line-height: 1.45;
+}
+
+.tarjeta .logo {
+  font-size: 3rem;
+  margin-bottom: 8px;
+}
+
+.tarjeta .nota {
+  font-size: 0.78rem;
+  margin-top: 14px;
+  margin-bottom: 0;
+}
+
+.acceso-denegado button {
+  width: 100%;
+}
+
+/* ---------- Modal ---------- */
+
+.modal-fondo {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  background: var(--tarjeta);
+  width: 100%;
+  max-width: 480px;
+  border-radius: 20px 20px 0 0;
+  padding: 18px 18px calc(18px + env(safe-area-inset-bottom));
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@media (min-width: 520px) {
+  .modal-fondo {
+    align-items: center;
+  }
+
+  .modal {
+    border-radius: 20px;
+  }
+}
+
+.modal-encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.modal-encabezado h2 {
+  font-size: 1.1rem;
+}
+
+/* ---------- Formularios ---------- */
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.formulario label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--texto);
+}
+
+.formulario input,
+.formulario select {
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 1rem;
+  background: var(--tarjeta);
+  color: var(--texto);
+  width: 100%;
+}
+
+.formulario input:focus,
+.formulario select:focus {
+  outline: 2px solid var(--verde);
+  border-color: var(--verde);
+}
+
+.etiqueta-grupo {
+  margin-bottom: -8px;
+}
+
+.selector-doble {
+  display: flex;
+  gap: 8px;
+}
+
+.selector-doble.vertical {
+  flex-direction: column;
+}
+
+.selector-doble button {
+  flex: 1;
+  border: 1px solid var(--borde);
+  background: var(--tarjeta);
+  color: var(--texto-suave);
+  border-radius: 10px;
+  padding: 11px 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.selector-doble button.activo {
+  border-color: var(--verde);
+  background: var(--verde-claro);
+  color: var(--verde-oscuro);
+}
+
+.selector-doble button.activo.verde {
+  border-color: var(--positivo);
+  background: #dcfce7;
+  color: #166534;
+}
+
+.selector-doble button.activo.rojo {
+  border-color: var(--negativo);
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* ---------- Categorías ---------- */
+
+.lista-categorias {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.lista-categorias li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  padding: 8px 8px 8px 14px;
+  font-size: 0.95rem;
+}
+
+.agregar-categoria {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.agregar-categoria input {
+  flex: 1;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  padding: 11px;
+  font-size: 1rem;
+}
+
+.nota {
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
