@@ -2,6 +2,7 @@ import {
   ArrowDownLeft,
   ArrowLeftRight,
   ArrowUpRight,
+  Download,
   Mail,
   Pencil,
   Settings2,
@@ -36,6 +37,7 @@ export default function Historial({
   onEditar,
   onBorrar,
   onCategorias,
+  onExportar,
 }) {
   return (
     <section className="historial">
@@ -49,6 +51,9 @@ export default function Historial({
             </option>
           ))}
         </select>
+        <button className="boton-icono" onClick={onExportar} title="Descargar Excel">
+          <Download size={18} />
+        </button>
         <button className="boton-icono" onClick={onCategorias} title="Editar categorías">
           <Settings2 size={18} />
         </button>

@@ -10,10 +10,12 @@ import {
   setDoc,
   updateDoc,
 } from 'firebase/firestore'
-import { ArrowLeftRight, Lock, Minus, Plus, Wallet } from 'lucide-react'
+import { ArrowLeftRight, Lock, Minus, Plus } from 'lucide-react'
 import { auth, googleProvider, db } from './firebase'
 import { CATEGORIAS_INICIALES } from './config'
 import { mesActual } from './utils'
+import { exportarExcel } from './exportar'
+import logo from './assets/logo-jc.png'
 import Login from './components/Login'
 import Saldos from './components/Saldos'
 import Sobres from './components/Sobres'
@@ -209,10 +211,11 @@ export default function App() {
     <div className="app">
       <header className="encabezado">
         <div className="titulo">
-          <h1>
-            <Wallet size={20} /> JC Finanzas
-          </h1>
-          <span>Jóvenes Central</span>
+          <img src={logo} alt="JC" className="logo-encabezado" />
+          <div>
+            <h1>JC Finanzas</h1>
+            <span>Jóvenes Central</span>
+          </div>
         </div>
         <button className="boton-salir" onClick={() => signOut(auth)} title={user.email}>
           Salir
@@ -254,6 +257,15 @@ export default function App() {
         onEditar={editar}
         onBorrar={borrar}
         onCategorias={() => setModal({ tipo: 'categorias' })}
+        onExportar={() =>
+          exportarExcel({
+            movimientos: visibles,
+            filtroMes,
+            saldos,
+            nombresSobres,
+            balancesSobres,
+          })
+        }
       />
 
       {modal?.tipo === 'movimiento' && (

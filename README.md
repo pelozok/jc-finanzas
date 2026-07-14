@@ -13,6 +13,7 @@ App web para llevar las finanzas del ministerio de jóvenes **JC — Jóvenes Ce
 - **Historial** ordenado por fecha con filtro por mes.
 - Los movimientos se pueden **editar y borrar** (lapicito ✏️ y basurero 🗑️).
 - Las **categorías** y los **sobres** se administran desde la propia app (iconos de ajustes en cada sección).
+- **Exportar a Excel**: el icono de descarga en la sección Movimientos genera un `.xlsx` con los movimientos del mes filtrado (o todos) y una hoja de resumen con los saldos y sobres.
 
 ## Cómo usarla
 

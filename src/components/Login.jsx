@@ -1,12 +1,10 @@
-import { Wallet } from 'lucide-react'
+import logo from '../assets/logo-jc.png'
 
 export default function Login({ onEntrar }) {
   return (
     <div className="pantalla-centrada">
       <div className="tarjeta login">
-        <div className="logo">
-          <Wallet size={44} />
-        </div>
+        <img src={logo} alt="JC" className="logo-jc" />
         <h1>JC Finanzas</h1>
         <p>
           Control de ingresos y gastos del ministerio de jóvenes

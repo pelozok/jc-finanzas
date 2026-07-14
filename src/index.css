@@ -50,13 +50,29 @@ svg {
   padding: 14px 4px 10px;
 }
 
+.titulo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .titulo h1 {
   font-size: 1.25rem;
   line-height: 1.1;
-  display: flex;
-  align-items: center;
-  gap: 7px;
   color: var(--verde-oscuro);
+}
+
+.logo-encabezado {
+  height: 34px;
+  width: auto;
+  mix-blend-mode: multiply;
+}
+
+.logo-jc {
+  width: 96px;
+  height: auto;
+  margin: 0 auto 10px;
+  display: block;
 }
 
 .titulo span {
