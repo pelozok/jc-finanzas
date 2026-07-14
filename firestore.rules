@@ -36,19 +36,32 @@ service cloud.firestore {
         && d.descripcion is string && d.descripcion.size() <= 500
         && d.creadoPor is string
         && (
+          // Ingresos y gastos (con sobre opcional)
           (
             d.tipo in ['ingreso', 'gasto']
             && d.keys().hasAll(['tipo', 'monto', 'fecha', 'categoria', 'descripcion', 'metodo', 'creadoPor', 'creadoEn'])
-            && d.keys().hasOnly(['tipo', 'monto', 'fecha', 'categoria', 'descripcion', 'metodo', 'creadoPor', 'creadoEn'])
+            && d.keys().hasOnly(['tipo', 'monto', 'fecha', 'categoria', 'descripcion', 'metodo', 'sobre', 'creadoPor', 'creadoEn'])
             && d.categoria is string && d.categoria.size() > 0 && d.categoria.size() <= 50
             && d.metodo in ['efectivo', 'depositado']
+            && (!('sobre' in d) || (d.sobre is string && d.sobre.size() <= 50))
           )
           ||
+          // Traslados entre efectivo y depositado
           (
             d.tipo == 'traslado'
             && d.keys().hasAll(['tipo', 'monto', 'fecha', 'descripcion', 'direccion', 'creadoPor', 'creadoEn'])
             && d.keys().hasOnly(['tipo', 'monto', 'fecha', 'descripcion', 'direccion', 'creadoPor', 'creadoEn'])
             && d.direccion in ['efectivo-a-depositado', 'depositado-a-efectivo']
+          )
+          ||
+          // Asignaciones entre sobres (no cambian el saldo total)
+          (
+            d.tipo == 'asignacion'
+            && d.keys().hasAll(['tipo', 'monto', 'fecha', 'descripcion', 'sobreOrigen', 'sobreDestino', 'creadoPor', 'creadoEn'])
+            && d.keys().hasOnly(['tipo', 'monto', 'fecha', 'descripcion', 'sobreOrigen', 'sobreDestino', 'creadoPor', 'creadoEn'])
+            && d.sobreOrigen is string && d.sobreOrigen.size() <= 50
+            && d.sobreDestino is string && d.sobreDestino.size() <= 50
+            && d.sobreOrigen != d.sobreDestino
           )
         );
     }
@@ -70,13 +83,13 @@ service cloud.firestore {
       allow delete: if esAutorizado();
     }
 
-    // Lista de categorías (un solo documento).
-    match /config/categorias {
+    // Listas de configuración: categorías y sobres.
+    match /config/{docId} {
       allow read: if esAutorizado();
       allow write: if esAutorizado()
+        && docId in ['categorias', 'sobres']
         && request.resource.data.keys().hasOnly(['lista'])
         && request.resource.data.lista is list
-        && request.resource.data.lista.size() > 0
         && request.resource.data.lista.size() <= 30;
     }
 

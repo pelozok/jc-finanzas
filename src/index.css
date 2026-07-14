@@ -11,6 +11,7 @@
   --positivo: #16a34a;
   --negativo: #dc2626;
   --azul: #2563eb;
+  --morado: #7c3aed;
   --fondo: #f1f5f9;
   --tarjeta: #ffffff;
   --texto: #0f172a;
@@ -28,6 +29,10 @@ body {
   background: var(--fondo);
   color: var(--texto);
   min-height: 100vh;
+}
+
+svg {
+  flex-shrink: 0;
 }
 
 .app {
@@ -48,6 +53,10 @@ body {
 .titulo h1 {
   font-size: 1.25rem;
   line-height: 1.1;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--verde-oscuro);
 }
 
 .titulo span {
@@ -103,6 +112,9 @@ body {
   opacity: 0.85;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .saldo-monto {
@@ -115,13 +127,7 @@ body {
   font-size: 1.9rem;
 }
 
-/* ---------- Botones de acción ---------- */
-
-.acciones {
-  display: flex;
-  gap: 8px;
-  margin: 14px 0;
-}
+/* ---------- Botones ---------- */
 
 .boton {
   border: none;
@@ -131,6 +137,10 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: opacity 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 .boton:active {
@@ -140,6 +150,56 @@ body {
 .boton:disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+.boton.primario {
+  background: var(--verde);
+  color: #fff;
+  width: 100%;
+}
+
+.boton.secundario {
+  background: var(--tarjeta);
+  color: var(--texto);
+  border: 1px solid var(--borde);
+}
+
+.boton-chico {
+  border: 1px solid var(--borde);
+  background: var(--tarjeta);
+  color: var(--texto-suave);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.boton-icono {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 5px 7px;
+  border-radius: 8px;
+  color: var(--texto-suave);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.boton-icono:active {
+  background: var(--fondo);
+}
+
+/* ---------- Acciones ---------- */
+
+.acciones {
+  display: flex;
+  gap: 8px;
+  margin: 14px 0;
 }
 
 .acciones .boton {
@@ -162,33 +222,24 @@ body {
   color: #1e40af;
 }
 
-.boton.primario {
-  background: var(--verde);
-  color: #fff;
-  width: 100%;
-}
+/* ---------- Barras de sección ---------- */
 
-.boton.secundario {
-  background: var(--tarjeta);
-  color: var(--texto);
-  border: 1px solid var(--borde);
-}
-
-/* ---------- Historial ---------- */
-
-.historial-barra {
+.seccion-barra {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
 }
 
-.historial-barra h2 {
+.seccion-barra h2 {
   font-size: 1.05rem;
   flex: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.historial-barra select {
+.seccion-barra select {
   border: 1px solid var(--borde);
   border-radius: 10px;
   padding: 8px 10px;
@@ -196,6 +247,45 @@ body {
   background: var(--tarjeta);
   color: var(--texto);
 }
+
+/* ---------- Sobres ---------- */
+
+.sobres {
+  margin-bottom: 16px;
+}
+
+.sobres-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sobre-chip {
+  background: var(--tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  padding: 8px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.sobre-chip span {
+  font-size: 0.75rem;
+  color: var(--texto-suave);
+}
+
+.sobre-chip strong {
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.sobre-chip.sin-asignar {
+  border-style: dashed;
+  background: transparent;
+}
+
+/* ---------- Historial ---------- */
 
 .vacio {
   text-align: center;
@@ -214,12 +304,41 @@ body {
 .item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 10px;
   background: var(--tarjeta);
   border: 1px solid var(--borde);
   border-radius: 14px;
-  padding: 12px 14px;
+  padding: 12px;
+}
+
+.item-icono {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.item-icono.ingreso {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.item-icono.gasto {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.item-icono.traslado {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.item-icono.asignacion {
+  background: #ede9fe;
+  color: #5b21b6;
 }
 
 .item-info {
@@ -227,6 +346,7 @@ body {
   flex-direction: column;
   gap: 2px;
   min-width: 0;
+  flex: 1;
 }
 
 .item-titulo {
@@ -265,22 +385,13 @@ body {
   color: var(--azul);
 }
 
+.item-monto.asignacion {
+  color: var(--morado);
+}
+
 .item-botones {
   display: flex;
   gap: 2px;
-}
-
-.boton-icono {
-  border: none;
-  background: none;
-  font-size: 1rem;
-  cursor: pointer;
-  padding: 4px 6px;
-  border-radius: 8px;
-}
-
-.boton-icono:active {
-  background: var(--fondo);
 }
 
 /* ---------- Pantallas centradas (login / acceso denegado) ---------- */
@@ -318,8 +429,10 @@ body {
 }
 
 .tarjeta .logo {
-  font-size: 3rem;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  color: var(--verde);
+  display: flex;
+  justify-content: center;
 }
 
 .tarjeta .nota {
@@ -330,6 +443,10 @@ body {
 
 .acceso-denegado button {
   width: 100%;
+}
+
+.acceso-denegado .logo {
+  color: var(--negativo);
 }
 
 /* ---------- Modal ---------- */
@@ -432,6 +549,10 @@ body {
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 .selector-doble button.activo {
@@ -452,9 +573,9 @@ body {
   color: #991b1b;
 }
 
-/* ---------- Categorías ---------- */
+/* ---------- Editor de listas (categorías y sobres) ---------- */
 
-.lista-categorias {
+.lista-editable {
   list-style: none;
   display: flex;
   flex-direction: column;
@@ -462,7 +583,7 @@ body {
   margin-bottom: 14px;
 }
 
-.lista-categorias li {
+.lista-editable li {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -472,13 +593,13 @@ body {
   font-size: 0.95rem;
 }
 
-.agregar-categoria {
+.agregar-item {
   display: flex;
   gap: 8px;
   margin-bottom: 14px;
 }
 
-.agregar-categoria input {
+.agregar-item input {
   flex: 1;
   border: 1px solid var(--borde);
   border-radius: 10px;

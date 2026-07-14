@@ -1,20 +1,25 @@
 import { useState } from 'react'
+import { Banknote, Landmark } from 'lucide-react'
 import Modal from './Modal'
 import { hoyISO } from '../utils'
 
-export default function MovimientoForm({ inicial, categorias, onGuardar, onCerrar }) {
+export default function MovimientoForm({ inicial, categorias, sobres, onGuardar, onCerrar }) {
   const editando = Boolean(inicial?.id)
   const [tipo, setTipo] = useState(inicial?.tipo ?? 'ingreso')
   const [monto, setMonto] = useState(inicial?.monto ?? '')
   const [fecha, setFecha] = useState(inicial?.fecha ?? hoyISO())
   const [categoria, setCategoria] = useState(inicial?.categoria ?? categorias[0] ?? 'Otros')
   const [metodo, setMetodo] = useState(inicial?.metodo ?? 'efectivo')
+  const [sobre, setSobre] = useState(inicial?.sobre ?? '')
   const [descripcion, setDescripcion] = useState(inicial?.descripcion ?? '')
   const [guardando, setGuardando] = useState(false)
 
-  // Si se está editando un movimiento cuya categoría ya fue borrada de la
-  // lista, se agrega como opción para no perderla al abrir el formulario.
-  const opciones = categorias.includes(categoria) ? categorias : [categoria, ...categorias]
+  // Si se está editando un movimiento cuya categoría o sobre ya fue borrado
+  // de la lista, se agrega como opción para no perderlo al abrir el formulario.
+  const opcionesCategoria = categorias.includes(categoria)
+    ? categorias
+    : [categoria, ...categorias]
+  const opcionesSobre = !sobre || sobres.includes(sobre) ? sobres : [sobre, ...sobres]
 
   async function enviar(e) {
     e.preventDefault()
@@ -25,7 +30,7 @@ export default function MovimientoForm({ inicial, categorias, onGuardar, onCerra
     }
     setGuardando(true)
     await onGuardar(
-      { tipo, monto: montoNum, fecha, categoria, metodo, descripcion: descripcion.trim() },
+      { tipo, monto: montoNum, fecha, categoria, metodo, sobre, descripcion: descripcion.trim() },
       inicial?.id,
     )
     setGuardando(false)
@@ -77,7 +82,7 @@ export default function MovimientoForm({ inicial, categorias, onGuardar, onCerra
         <label>
           Categoría
           <select value={categoria} onChange={(e) => setCategoria(e.target.value)}>
-            {opciones.map((c) => (
+            {opcionesCategoria.map((c) => (
               <option key={c} value={c}>
                 {c}
               </option>
@@ -92,16 +97,30 @@ export default function MovimientoForm({ inicial, categorias, onGuardar, onCerra
             className={metodo === 'efectivo' ? 'activo' : ''}
             onClick={() => setMetodo('efectivo')}
           >
-            💵 Efectivo
+            <Banknote size={16} /> Efectivo
           </button>
           <button
             type="button"
             className={metodo === 'depositado' ? 'activo' : ''}
             onClick={() => setMetodo('depositado')}
           >
-            🏦 Depositado
+            <Landmark size={16} /> Depositado
           </button>
         </div>
+
+        {opcionesSobre.length > 0 && (
+          <label>
+            Sobre (opcional)
+            <select value={sobre} onChange={(e) => setSobre(e.target.value)}>
+              <option value="">Sin asignar</option>
+              {opcionesSobre.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
 
         <label>
           Descripción (opcional)

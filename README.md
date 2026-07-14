@@ -8,10 +8,11 @@ App web para llevar las finanzas del ministerio de jóvenes **JC — Jóvenes Ce
 
 - Registra **ingresos** y **gastos** en colones (₡) con fecha, categoría, descripción y método: 💵 **Efectivo** o 🏦 **Depositado** (cuenta bancaria / SINPE).
 - Registra **traslados** entre efectivo y depositado (ej: depositar el efectivo al banco).
+- **Sobres**: divide el saldo total en fondos apartados (campamento, caja chica, etc.). Cada ingreso o gasto puede asignarse a un sobre, y con el botón "Mover" se pasa plata de un sobre a otro (o desde "Sin asignar"). Los sobres no cambian el saldo total: solo lo reparten.
 - Muestra siempre arriba el **saldo en efectivo, el depositado y el total**, calculados automáticamente a partir de todos los movimientos.
 - **Historial** ordenado por fecha con filtro por mes.
 - Los movimientos se pueden **editar y borrar** (lapicito ✏️ y basurero 🗑️).
-- Las **categorías** se administran desde la propia app (botón ⚙️ junto al filtro de mes).
+- Las **categorías** y los **sobres** se administran desde la propia app (iconos de ajustes en cada sección).
 
 ## Cómo usarla
 
@@ -71,7 +72,9 @@ Con App Check en modo *enforcement*, al correr en `localhost` la consola del nav
 
 ## Estructura de los datos (Firestore)
 
-- Colección `movimientos`: documentos con `tipo` (`ingreso` | `gasto` | `traslado`), `monto` (número > 0), `fecha` (`YYYY-MM-DD`), `descripcion`, `creadoPor`, `creadoEn`; los ingresos/gastos llevan `categoria` y `metodo` (`efectivo` | `depositado`); los traslados llevan `direccion` (`efectivo-a-depositado` | `depositado-a-efectivo`).
-- Documento `config/categorias`: `{ lista: [...] }` con las categorías disponibles.
+- Colección `movimientos`: documentos con `tipo` (`ingreso` | `gasto` | `traslado` | `asignacion`), `monto` (número > 0), `fecha` (`YYYY-MM-DD`), `descripcion`, `creadoPor`, `creadoEn`; los ingresos/gastos llevan `categoria`, `metodo` (`efectivo` | `depositado`) y opcionalmente `sobre`; los traslados llevan `direccion` (`efectivo-a-depositado` | `depositado-a-efectivo`); las asignaciones entre sobres llevan `sobreOrigen` y `sobreDestino` (cadena vacía = "Sin asignar").
+- Documentos `config/categorias` y `config/sobres`: `{ lista: [...] }` con las opciones disponibles.
+
+> ⚠️ Si se cambia la estructura de los datos, hay que actualizar también las reglas ([`firestore.rules`](firestore.rules)) y volver a publicarlas en la consola de Firebase.
 
 Los saldos **no se guardan**: se calculan sumando todos los movimientos, así nunca quedan desincronizados.

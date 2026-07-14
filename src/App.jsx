@@ -10,21 +10,25 @@ import {
   setDoc,
   updateDoc,
 } from 'firebase/firestore'
+import { ArrowLeftRight, Lock, Minus, Plus, Wallet } from 'lucide-react'
 import { auth, googleProvider, db } from './firebase'
 import { CATEGORIAS_INICIALES } from './config'
 import { mesActual } from './utils'
 import Login from './components/Login'
 import Saldos from './components/Saldos'
+import Sobres from './components/Sobres'
 import Historial from './components/Historial'
 import MovimientoForm from './components/MovimientoForm'
 import TrasladoForm from './components/TrasladoForm'
-import Categorias from './components/Categorias'
+import AsignacionForm from './components/AsignacionForm'
+import EditorLista from './components/EditorLista'
 
 export default function App() {
   const [user, setUser] = useState(undefined) // undefined = todavía no sabemos
   const [acceso, setAcceso] = useState('cargando') // cargando | ok | denegado
   const [movimientos, setMovimientos] = useState([])
   const [categorias, setCategorias] = useState(CATEGORIAS_INICIALES)
+  const [listaSobres, setListaSobres] = useState([])
   const [modal, setModal] = useState(null)
   const [filtroMes, setFiltroMes] = useState(mesActual())
 
@@ -59,6 +63,14 @@ export default function App() {
     })
   }, [acceso])
 
+  // Sobres en vivo (fondos apartados dentro del saldo total).
+  useEffect(() => {
+    if (acceso !== 'ok') return
+    return onSnapshot(doc(db, 'config', 'sobres'), (snap) => {
+      if (snap.exists()) setListaSobres(snap.data().lista)
+    })
+  }, [acceso])
+
   // Los saldos se calculan siempre sobre TODOS los movimientos,
   // sin importar el mes filtrado en el historial.
   const saldos = useMemo(() => {
@@ -69,7 +81,7 @@ export default function App() {
         const signo = m.direccion === 'efectivo-a-depositado' ? 1 : -1
         efectivo -= signo * m.monto
         depositado += signo * m.monto
-      } else {
+      } else if (m.tipo === 'ingreso' || m.tipo === 'gasto') {
         const signo = m.tipo === 'ingreso' ? 1 : -1
         if (m.metodo === 'efectivo') efectivo += signo * m.monto
         else depositado += signo * m.monto
@@ -77,6 +89,29 @@ export default function App() {
     }
     return { efectivo, depositado, total: efectivo + depositado }
   }, [movimientos])
+
+  // Saldo de cada sobre. La clave '' representa "Sin asignar".
+  const balancesSobres = useMemo(() => {
+    const mapa = new Map()
+    const sumar = (nombre, delta) =>
+      mapa.set(nombre || '', (mapa.get(nombre || '') ?? 0) + delta)
+    for (const m of movimientos) {
+      if (m.tipo === 'ingreso') sumar(m.sobre, m.monto)
+      else if (m.tipo === 'gasto') sumar(m.sobre, -m.monto)
+      else if (m.tipo === 'asignacion') {
+        sumar(m.sobreOrigen, -m.monto)
+        sumar(m.sobreDestino, m.monto)
+      }
+    }
+    return mapa
+  }, [movimientos])
+
+  // Sobres a mostrar: los configurados más cualquiera que aún tenga
+  // movimientos aunque se haya quitado de la lista.
+  const nombresSobres = useMemo(() => {
+    const conMovimientos = [...balancesSobres.keys()].filter((n) => n !== '')
+    return [...new Set([...listaSobres, ...conMovimientos])]
+  }, [listaSobres, balancesSobres])
 
   const meses = useMemo(() => {
     const set = new Set(movimientos.map((m) => m.fecha?.slice(0, 7)).filter(Boolean))
@@ -122,13 +157,19 @@ export default function App() {
     }
   }
 
-  async function guardarCategorias(lista) {
+  async function guardarLista(docId, lista) {
     try {
-      await setDoc(doc(db, 'config', 'categorias'), { lista })
+      await setDoc(doc(db, 'config', docId), { lista })
       setModal(null)
     } catch (e) {
-      alert('No se pudieron guardar las categorías: ' + e.message)
+      alert('No se pudo guardar la lista: ' + e.message)
     }
+  }
+
+  function editar(m) {
+    if (m.tipo === 'traslado') setModal({ tipo: 'traslado', datos: m })
+    else if (m.tipo === 'asignacion') setModal({ tipo: 'asignacion', datos: m })
+    else setModal({ tipo: 'movimiento', datos: m })
   }
 
   if (user === undefined) {
@@ -143,7 +184,10 @@ export default function App() {
     return (
       <div className="pantalla-centrada">
         <div className="tarjeta acceso-denegado">
-          <h1>🔒 Acceso restringido</h1>
+          <div className="logo">
+            <Lock size={40} />
+          </div>
+          <h1>Acceso restringido</h1>
           <p>
             La cuenta <strong>{user.email}</strong> no está autorizada para ver las
             finanzas de JC — Jóvenes Central.
@@ -165,7 +209,9 @@ export default function App() {
     <div className="app">
       <header className="encabezado">
         <div className="titulo">
-          <h1>💰 JC Finanzas</h1>
+          <h1>
+            <Wallet size={20} /> JC Finanzas
+          </h1>
           <span>Jóvenes Central</span>
         </div>
         <button className="boton-salir" onClick={() => signOut(auth)} title={user.email}>
@@ -180,31 +226,32 @@ export default function App() {
           className="boton accion-ingreso"
           onClick={() => setModal({ tipo: 'movimiento', datos: { tipo: 'ingreso' } })}
         >
-          + Ingreso
+          <Plus size={17} /> Ingreso
         </button>
         <button
           className="boton accion-gasto"
           onClick={() => setModal({ tipo: 'movimiento', datos: { tipo: 'gasto' } })}
         >
-          − Gasto
+          <Minus size={17} /> Gasto
         </button>
         <button className="boton accion-traslado" onClick={() => setModal({ tipo: 'traslado' })}>
-          ⇄ Traslado
+          <ArrowLeftRight size={17} /> Traslado
         </button>
       </div>
+
+      <Sobres
+        nombres={nombresSobres}
+        balances={balancesSobres}
+        onMover={() => setModal({ tipo: 'asignacion' })}
+        onEditar={() => setModal({ tipo: 'sobres' })}
+      />
 
       <Historial
         movimientos={visibles}
         meses={meses}
         filtroMes={filtroMes}
         onFiltroMes={setFiltroMes}
-        onEditar={(m) =>
-          setModal(
-            m.tipo === 'traslado'
-              ? { tipo: 'traslado', datos: m }
-              : { tipo: 'movimiento', datos: m },
-          )
-        }
+        onEditar={editar}
         onBorrar={borrar}
         onCategorias={() => setModal({ tipo: 'categorias' })}
       />
@@ -213,6 +260,7 @@ export default function App() {
         <MovimientoForm
           inicial={modal.datos}
           categorias={categorias}
+          sobres={nombresSobres}
           onGuardar={guardar}
           onCerrar={() => setModal(null)}
         />
@@ -220,8 +268,34 @@ export default function App() {
       {modal?.tipo === 'traslado' && (
         <TrasladoForm inicial={modal.datos} onGuardar={guardar} onCerrar={() => setModal(null)} />
       )}
+      {modal?.tipo === 'asignacion' && (
+        <AsignacionForm
+          inicial={modal.datos}
+          sobres={nombresSobres}
+          onGuardar={guardar}
+          onCerrar={() => setModal(null)}
+        />
+      )}
       {modal?.tipo === 'categorias' && (
-        <Categorias lista={categorias} onGuardar={guardarCategorias} onCerrar={() => setModal(null)} />
+        <EditorLista
+          titulo="Categorías"
+          nota="Los movimientos ya guardados conservan su categoría aunque la quités de la lista."
+          lista={categorias}
+          placeholder="Nueva categoría"
+          onGuardar={(l) => guardarLista('categorias', l)}
+          onCerrar={() => setModal(null)}
+        />
+      )}
+      {modal?.tipo === 'sobres' && (
+        <EditorLista
+          titulo="Sobres"
+          nota="Los sobres dividen el saldo total en fondos apartados (campamento, caja chica, etc.). La plata que no esté en ningún sobre queda como «Sin asignar»."
+          lista={listaSobres}
+          placeholder="Nuevo sobre"
+          permitirVacia
+          onGuardar={(l) => guardarLista('sobres', l)}
+          onCerrar={() => setModal(null)}
+        />
       )}
     </div>
   )

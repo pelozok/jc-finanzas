@@ -1,3 +1,4 @@
+import { Banknote, Landmark } from 'lucide-react'
 import { colones } from '../utils'
 
 export default function Saldos({ saldos }) {
@@ -9,11 +10,15 @@ export default function Saldos({ saldos }) {
       </div>
       <div className="saldos-detalle">
         <div className="saldo">
-          <span className="saldo-etiqueta">💵 Efectivo</span>
+          <span className="saldo-etiqueta">
+            <Banknote size={14} /> Efectivo
+          </span>
           <span className="saldo-monto">{colones(saldos.efectivo)}</span>
         </div>
         <div className="saldo">
-          <span className="saldo-etiqueta">🏦 Depositado</span>
+          <span className="saldo-etiqueta">
+            <Landmark size={14} /> Depositado
+          </span>
           <span className="saldo-monto">{colones(saldos.depositado)}</span>
         </div>
       </div>

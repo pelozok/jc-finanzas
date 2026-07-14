@@ -1,8 +1,12 @@
+import { Wallet } from 'lucide-react'
+
 export default function Login({ onEntrar }) {
   return (
     <div className="pantalla-centrada">
       <div className="tarjeta login">
-        <div className="logo">💰</div>
+        <div className="logo">
+          <Wallet size={44} />
+        </div>
         <h1>JC Finanzas</h1>
         <p>
           Control de ingresos y gastos del ministerio de jóvenes

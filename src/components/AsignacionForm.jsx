@@ -1,14 +1,17 @@
 import { useState } from 'react'
-import { ArrowRight, Banknote, Landmark } from 'lucide-react'
 import Modal from './Modal'
 import { hoyISO } from '../utils'
 
-export default function TrasladoForm({ inicial, onGuardar, onCerrar }) {
-  const [direccion, setDireccion] = useState(inicial?.direccion ?? 'efectivo-a-depositado')
+export default function AsignacionForm({ inicial, sobres, onGuardar, onCerrar }) {
+  const [sobreOrigen, setSobreOrigen] = useState(inicial?.sobreOrigen ?? '')
+  const [sobreDestino, setSobreDestino] = useState(inicial?.sobreDestino ?? (sobres[0] ?? ''))
   const [monto, setMonto] = useState(inicial?.monto ?? '')
   const [fecha, setFecha] = useState(inicial?.fecha ?? hoyISO())
   const [descripcion, setDescripcion] = useState(inicial?.descripcion ?? '')
   const [guardando, setGuardando] = useState(false)
+
+  // Por si un sobre viejo ya no está en la lista pero aparece en este registro.
+  const opciones = [...new Set([...sobres, sobreOrigen, sobreDestino])].filter(Boolean)
 
   async function enviar(e) {
     e.preventDefault()
@@ -17,35 +20,53 @@ export default function TrasladoForm({ inicial, onGuardar, onCerrar }) {
       alert('Ingresá un monto mayor a cero.')
       return
     }
+    if (sobreOrigen === sobreDestino) {
+      alert('Elegí dos sobres distintos.')
+      return
+    }
     setGuardando(true)
     await onGuardar(
-      { tipo: 'traslado', monto: montoNum, fecha, direccion, descripcion: descripcion.trim() },
+      {
+        tipo: 'asignacion',
+        monto: montoNum,
+        fecha,
+        sobreOrigen,
+        sobreDestino,
+        descripcion: descripcion.trim(),
+      },
       inicial?.id,
     )
     setGuardando(false)
   }
 
+  function selectorSobre(valor, setValor) {
+    return (
+      <select value={valor} onChange={(e) => setValor(e.target.value)}>
+        <option value="">Sin asignar</option>
+        {opciones.map((s) => (
+          <option key={s} value={s}>
+            {s}
+          </option>
+        ))}
+      </select>
+    )
+  }
+
   return (
-    <Modal titulo={inicial?.id ? 'Editar traslado' : 'Nuevo traslado'} onCerrar={onCerrar}>
+    <Modal
+      titulo={inicial?.id ? 'Editar movimiento de sobres' : 'Mover entre sobres'}
+      onCerrar={onCerrar}
+    >
       <form onSubmit={enviar} className="formulario">
-        <div className="selector-doble vertical">
-          <button
-            type="button"
-            className={direccion === 'efectivo-a-depositado' ? 'activo' : ''}
-            onClick={() => setDireccion('efectivo-a-depositado')}
-          >
-            <Banknote size={16} /> <ArrowRight size={14} /> <Landmark size={16} />
-            Depositar efectivo al banco
-          </button>
-          <button
-            type="button"
-            className={direccion === 'depositado-a-efectivo' ? 'activo' : ''}
-            onClick={() => setDireccion('depositado-a-efectivo')}
-          >
-            <Landmark size={16} /> <ArrowRight size={14} /> <Banknote size={16} />
-            Retirar del banco a efectivo
-          </button>
-        </div>
+        <label>
+          Desde
+          {selectorSobre(sobreOrigen, setSobreOrigen)}
+        </label>
+
+        <label>
+          Hacia
+          {selectorSobre(sobreDestino, setSobreDestino)}
+        </label>
 
         <label>
           Monto (₡)
@@ -56,7 +77,7 @@ export default function TrasladoForm({ inicial, onGuardar, onCerrar }) {
             step="1"
             value={monto}
             onChange={(e) => setMonto(e.target.value)}
-            placeholder="Ej: 50000"
+            placeholder="Ej: 25000"
             required
             autoFocus={!inicial?.id}
           />
@@ -73,7 +94,7 @@ export default function TrasladoForm({ inicial, onGuardar, onCerrar }) {
             type="text"
             value={descripcion}
             onChange={(e) => setDescripcion(e.target.value)}
-            placeholder="Ej: depósito por SINPE"
+            placeholder="Ej: apartado para el campamento"
             maxLength={500}
           />
         </label>
